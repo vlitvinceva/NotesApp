@@ -1,7 +1,7 @@
 package ru.notesapp.ui
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -9,20 +9,26 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import kotlinx.coroutines.launch
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.notesapp.domain.Note
-import ru.notesapp.domain.NoteType
-import ru.notesapp.ui.theme.NotesAppTheme
-import ru.notesapp.ui.theme.ThemeVariant
+import ru.notesapp.viewmodel.NotesUiState
+import ru.notesapp.viewmodel.NotesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotesListScreen(
-    notes: List<Note>,
     onNoteClick: (Note) -> Unit,
+    viewModel: NotesViewModel = viewModel(),
+    notes: List<Note>,
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var showDialog by remember { mutableStateOf(false) }
+    var title by remember { mutableStateOf("") }
+    var content by remember { mutableStateOf("") }
+
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -38,43 +44,44 @@ fun NotesListScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                scope.launch {
-                    val result = snackbarHostState.showSnackbar(
-                        message = "Создание новой заметки",
-                        actionLabel = "Отмена",
-                    )
-                    if (result == SnackbarResult.ActionPerformed) {
-                        Log.d("NotesApp", "Action: ОТМЕНА")
-                    }
-                }
-            }) { Icon(Icons.Default.Add, contentDescription = "Добавить") }
+            FloatingActionButton(onClick = { showDialog = true }) {
+                Icon(Icons.Default.Add, contentDescription = "Добавить")
+            }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { inner ->
         Box(modifier = Modifier.padding(inner).fillMaxSize()) {
-            NoteList(notes = notes, onClick = onNoteClick)
+            when (val s = uiState) {
+                is NotesUiState.Loading -> Box(Modifier.fillMaxSize(), Alignment.Center) { CircularProgressIndicator() }
+                is NotesUiState.Empty -> EmptyState("Пока нет заметок", "Нажмите +, чтобы создать")
+                is NotesUiState.Success -> NoteList(notes = s.notes, onClick = onNoteClick)
+                is NotesUiState.Error -> EmptyState("Ошибка", s.message)
+            }
         }
     }
-}
 
-@Preview
-@Composable
-private fun NotesListScreenLightPastel() {
-    NotesAppTheme(darkTheme = false, themeVariant = ThemeVariant.PASTEL) {
-        NotesListScreen(notes = demoNotes(), onNoteClick = {})
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Новая заметка") },
+            text = {
+                Column {
+                    OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Заголовок") })
+                    OutlinedTextField(value = content, onValueChange = { content = it }, label = { Text("Содержание") })
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = title.isNotBlank(),
+                    onClick = {
+                        viewModel.addNote(title, content)
+                        title = ""; content = ""
+                        showDialog = false
+                    },
+                ) { Text("Сохранить") }
+            },
+            dismissButton = { TextButton(onClick = { showDialog = false }) { Text("Отмена") } },
+        )
     }
 }
 
-@Preview
-@Composable
-private fun NotesListScreenDarkForest() {
-    NotesAppTheme(darkTheme = true, themeVariant = ThemeVariant.FOREST) {
-        NotesListScreen(notes = demoNotes(), onNoteClick = {})
-    }
-}
-
-private fun demoNotes() = listOf(
-    Note(1, "Первая", "Текст", 0L, NoteType.Text),
-    Note(2, "Вторая", "Текст", 0L, NoteType.Image),
-)
