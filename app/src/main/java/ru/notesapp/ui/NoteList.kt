@@ -1,0 +1,46 @@
+package ru.notesapp.ui
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import ru.notesapp.domain.Note
+import ru.notesapp.domain.NoteType
+
+@Composable
+fun NoteList(
+    notes: List<Note>,
+    onClick: (Note) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (notes.isEmpty()) {
+        EmptyState("Пока нет заметок", "Нажмите +, чтобы создать первую", modifier)
+        return
+    }
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items(notes, key = { it.id }) { note ->
+            NoteCard(note = note, onClick = { onClick(note) })
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NoteListPreview() {
+    NoteList(
+        notes = listOf(
+            Note(1, "Заметка 1", "Текст 1", 0L, NoteType.Text),
+            Note(2, "Заметка 2", "Текст 2", 0L, NoteType.Image),
+            Note(3, "Заметка 3", "Текст 3", 0L, NoteType.Audio),
+        ),
+        onClick = {},
+    )
+}

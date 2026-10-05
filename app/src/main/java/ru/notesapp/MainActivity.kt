@@ -9,21 +9,25 @@ import androidx.compose.material3.Text
 import ru.notesapp.domain.Note
 import ru.notesapp.domain.NoteType
 import ru.notesapp.domain.summary
+import androidx.compose.runtime.remember
+import ru.notesapp.ui.NoteList
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                Text("NotesApp — практика 1")
+                val notes = remember {
+                    listOf(
+                        Note(1, "Первая", "Текст первой заметки", 0L, NoteType.Text),
+                        Note(2, "Вторая", "Описание картинки", 0L, NoteType.Image),
+                        Note(3, "Третья", "Запись лекции", 0L, NoteType.Audio),
+                        Note(4, "Четвёртая", "Длинный текст", 0L, NoteType.Text),
+                        Note(5, "Пятая", "Ещё текст", 0L, NoteType.Text),
+                    )
+                }
+                NoteList(notes = notes, onClick = { Log.d("NotesApp", "Clicked: ${it.id}") })
             }
         }
-
-        val notes = listOf(
-            Note(1, "Первая", "Очень длинный текст первой заметки, который нужно обрезать", System.currentTimeMillis(), NoteType.Text),
-            Note(2, "Картинка", "Описание картинки", System.currentTimeMillis(), NoteType.Image),
-            Note(3, "Аудио", "Запись лекции", System.currentTimeMillis(), NoteType.Audio),
-        )
-        notes.forEach { Log.d("NotesApp", it.summary()) }
     }
 }
