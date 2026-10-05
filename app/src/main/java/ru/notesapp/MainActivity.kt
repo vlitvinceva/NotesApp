@@ -11,22 +11,21 @@ import ru.notesapp.domain.NoteType
 import ru.notesapp.domain.summary
 import androidx.compose.runtime.remember
 import ru.notesapp.ui.NoteList
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import ru.notesapp.ui.theme.ThemeVariant
+import ru.notesapp.ui.theme.NotesAppTheme
+import ru.notesapp.ui.RootScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
-                val notes = remember {
-                    listOf(
-                        Note(1, "Первая", "Текст первой заметки", 0L, NoteType.Text),
-                        Note(2, "Вторая", "Описание картинки", 0L, NoteType.Image),
-                        Note(3, "Третья", "Запись лекции", 0L, NoteType.Audio),
-                        Note(4, "Четвёртая", "Длинный текст", 0L, NoteType.Text),
-                        Note(5, "Пятая", "Ещё текст", 0L, NoteType.Text),
-                    )
-                }
-                NoteList(notes = notes, onClick = { Log.d("NotesApp", "Clicked: ${it.id}") })
+            var theme by remember { mutableStateOf(ThemeVariant.PASTEL) }
+            NotesAppTheme(themeVariant = theme) {
+                RootScreen(onThemeChange = { theme = it }, currentTheme = theme)
             }
         }
     }
