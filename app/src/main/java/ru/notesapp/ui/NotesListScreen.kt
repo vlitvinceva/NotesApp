@@ -21,8 +21,8 @@ import ru.notesapp.viewmodel.NotesViewModel
 @Composable
 fun NotesListScreen(
     onNoteClick: (Note) -> Unit,
-    viewModel: NotesViewModel = viewModel(),
-    notes: List<Note>,
+    viewModel: NotesViewModel,
+
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
@@ -43,10 +43,12 @@ fun NotesListScreen(
                 },
             )
         },
+
         floatingActionButton = {
             FloatingActionButton(onClick = { showDialog = true }) {
                 Icon(Icons.Default.Add, contentDescription = "Добавить")
             }
+
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { inner ->

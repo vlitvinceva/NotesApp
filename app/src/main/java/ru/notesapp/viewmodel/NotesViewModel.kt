@@ -2,61 +2,52 @@ package ru.notesapp.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import ru.notesapp.data.InMemoryNotesRepository
+import ru.notesapp.data.RoomNotesRepository
 import ru.notesapp.domain.Note
 import ru.notesapp.domain.NoteType
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class NotesViewModel(
-    private val repository: InMemoryNotesRepository = InMemoryNotesRepository(),
+    private val repository: RoomNotesRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<NotesUiState>(NotesUiState.Loading)
     val uiState: StateFlow<NotesUiState> = _uiState.asStateFlow()
 
-    private var allNotes: List<Note> = emptyList()
+    private val query = MutableStateFlow("")
 
-    init { loadNotes() }
-
-    fun loadNotes() {
-        _uiState.value = NotesUiState.Loading
+    init {
         viewModelScope.launch {
-            delay(500)
-            allNotes = withContext(Dispatchers.IO) { repository.getAll() }
-            updateState(allNotes)
+            query.flatMapLatest { q ->
+                if (q.isBlank()) repository.observeAll()
+                else repository.search(q)
+            }.collect { notes ->
+                _uiState.value = if (notes.isEmpty()) {
+                    NotesUiState.Empty
+                } else {
+                    NotesUiState.Success(notes)
+                }
+            }
         }
     }
 
     fun addNote(title: String, content: String, type: NoteType = NoteType.Text) {
         viewModelScope.launch {
-            withContext(Dispatchers.IO) { repository.add(Note(0, title, content, System.currentTimeMillis(), type)) }
-            allNotes = repository.getAll()
-            updateState(allNotes)
+            repository.add(Note(0, title, content, System.currentTimeMillis(), type))
         }
     }
 
     fun deleteNote(id: Long) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) { repository.delete(id) }
-            allNotes = repository.getAll()
-            updateState(allNotes)
-        }
+        viewModelScope.launch { repository.delete(id) }
     }
 
-    fun searchNotes(query: String) {
-        viewModelScope.launch {
-            val list = if (query.isBlank()) allNotes else withContext(Dispatchers.IO) { repository.search(query) }
-            updateState(list)
-        }
-    }
-
-    private fun updateState(list: List<Note>) {
-        _uiState.value = if (list.isEmpty()) NotesUiState.Empty else NotesUiState.Success(list)
+    fun searchNotes(q: String) {
+        query.value = q
     }
 }

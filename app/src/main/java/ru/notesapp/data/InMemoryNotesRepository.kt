@@ -11,12 +11,15 @@ class InMemoryNotesRepository {
 
     fun getAll(): List<Note> = notes.toList()
     fun getById(id: Long): Note? = notes.find { it.id == id }
+
     fun add(note: Note): Long {
         val newId = (notes.maxOfOrNull { it.id } ?: 0L) + 1
         notes.add(note.copy(id = newId))
         return newId
     }
+
     fun delete(id: Long): Boolean = notes.removeIf { it.id == id }
+
     fun search(query: String): List<Note> =
         notes.filter { it.title.contains(query, ignoreCase = true) }
 }
