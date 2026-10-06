@@ -36,7 +36,6 @@ private val bottomItems = listOf(
 
 @Composable
 fun RootScreen(
-    viewModel: NotesViewModel,
     onThemeChange: (ThemeVariant) -> Unit,
     currentTheme: ThemeVariant,
 ) {
@@ -75,7 +74,6 @@ fun RootScreen(
         ) {
             composable(Routes.NOTES) {
                 NotesListScreen(
-                    viewModel = viewModel,
                     onNoteClick = { note -> navController.navigate(Routes.note(note.id)) },
                 )
             }
