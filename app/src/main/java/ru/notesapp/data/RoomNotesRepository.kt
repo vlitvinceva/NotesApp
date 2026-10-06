@@ -12,11 +12,11 @@ class RoomNotesRepository(private val dao: NoteDao) {
     fun observeAll(): Flow<List<Note>> =
         dao.observeAll().map { list -> list.map { it.toDomain() } }
 
-    suspend fun getById(id: Long): Note? =
-        dao.getById(id)?.toDomain()
-
     fun search(query: String): Flow<List<Note>> =
         dao.searchByTitle(query).map { list -> list.map { it.toDomain() } }
+
+    suspend fun getById(id: Long): Note? =
+        dao.getById(id)?.toDomain()
 
     suspend fun add(note: Note): Long =
         dao.insert(note.toEntity())

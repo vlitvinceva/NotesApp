@@ -2,9 +2,10 @@ package ru.notesapp.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import ru.notesapp.data.SyncedNotesRepository
 
 class NotesViewModelFactory(
-    private val repository: ru.notesapp.data.RoomNotesRepository,
+    private val repository: SyncedNotesRepository,
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")

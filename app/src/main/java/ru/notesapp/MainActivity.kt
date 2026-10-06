@@ -7,13 +7,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.room.Room
-import ru.notesapp.data.RoomNotesRepository
+import ru.notesapp.data.SyncedNotesRepository
 import ru.notesapp.data.local.AppDatabase
 import ru.notesapp.data.local.MIGRATION_1_2
+import ru.notesapp.data.remote.RetrofitService
 import ru.notesapp.ui.RootScreen
 import ru.notesapp.ui.theme.NotesAppTheme
 import ru.notesapp.ui.theme.ThemeVariant
@@ -24,7 +23,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 1. Создаём Room-базу
+        // 1. Room
         val db = Room.databaseBuilder(
             applicationContext,
             AppDatabase::class.java,
@@ -33,10 +32,13 @@ class MainActivity : ComponentActivity() {
             .addMigrations(MIGRATION_1_2)
             .build()
 
-        // 2. Создаём репозиторий
-        val repository = RoomNotesRepository(db.noteDao())
+        // 2. Retrofit
+        val api = RetrofitService.noteApi
 
-        // 3. Создаём фабрику
+        // 3. Repository
+        val repository = SyncedNotesRepository(db.noteDao(), api)
+
+        // 4. Factory
         val factory = NotesViewModelFactory(repository)
 
         setContent {

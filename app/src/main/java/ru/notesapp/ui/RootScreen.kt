@@ -23,14 +23,12 @@ import ru.notesapp.ui.navigation.Routes
 import ru.notesapp.ui.theme.ThemeVariant
 import ru.notesapp.viewmodel.NotesViewModel
 
-// Модель элемента нижней навигации
 private data class BottomItem(
     val route: String,
     val title: String,
     val icon: ImageVector,
 )
 
-// Список пунктов BottomBar
 private val bottomItems = listOf(
     BottomItem(Routes.NOTES, "Заметки", Icons.Default.Note),
     BottomItem(Routes.SETTINGS, "Настройки", Icons.Default.Settings),
@@ -43,14 +41,11 @@ fun RootScreen(
     currentTheme: ThemeVariant,
 ) {
     val navController = rememberNavController()
-
-    // Следим за текущим маршрутом
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
     Scaffold(
         bottomBar = {
-            // BottomBar показывается только на "notes" и "settings"
             if (currentRoute in bottomItems.map { it.route }) {
                 NavigationBar {
                     bottomItems.forEach { item ->
@@ -72,40 +67,27 @@ fun RootScreen(
                 }
             }
         },
-    ) { innerPadding ->
+    ) { inner ->
         NavHost(
             navController = navController,
             startDestination = Routes.NOTES,
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier.padding(inner),
         ) {
-            // --- Список заметок ---
             composable(Routes.NOTES) {
                 NotesListScreen(
                     viewModel = viewModel,
-                    onNoteClick = { note ->
-                        navController.navigate(Routes.note(note.id))
-                    },
+                    onNoteClick = { note -> navController.navigate(Routes.note(note.id)) },
                 )
             }
-
-            // --- Детали заметки ---
             composable(
                 route = Routes.NOTE,
                 arguments = listOf(navArgument("id") { type = NavType.LongType }),
-            ) { backStackEntry ->
-                val id = backStackEntry.arguments?.getLong("id") ?: -1L
-                NoteDetailScreen(
-                    noteId = id,
-                    onBack = { navController.popBackStack() },
-                )
+            ) { entry ->
+                val id = entry.arguments?.getLong("id") ?: -1L
+                NoteDetailScreen(noteId = id, onBack = { navController.popBackStack() })
             }
-
-            // --- Настройки ---
             composable(Routes.SETTINGS) {
-                SettingsScreen(
-                    onThemeChange = onThemeChange,
-                    currentTheme = currentTheme,
-                )
+                SettingsScreen(onThemeChange = onThemeChange, currentTheme = currentTheme)
             }
         }
     }

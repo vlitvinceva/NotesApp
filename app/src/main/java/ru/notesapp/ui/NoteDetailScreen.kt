@@ -37,58 +37,27 @@ fun NoteDetailScreen(
                 title = { Text("Заметка #$noteId") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Назад",
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
                     }
                 },
             )
         },
     ) { inner ->
         if (note == null) {
-            EmptyState(
-                title = "Заметка не найдена",
-                subtitle = "Вернитесь назад",
-                modifier = Modifier.padding(inner),
-            )
+            EmptyState("Заметка не найдена", "Вернитесь назад", Modifier.padding(inner))
         } else {
-            Column(
-                modifier = Modifier
-                    .padding(inner)
-                    .padding(16.dp)
-                    .fillMaxSize(),
-            ) {
-                Text(
-                    text = note.title,
-                    style = MaterialTheme.typography.titleLarge,
-                )
-
-                // ✅ ИСПРАВЛЕНО: вместо note.type.name используем when
+            Column(modifier = Modifier.padding(inner).padding(16.dp).fillMaxSize()) {
+                Text(note.title, style = MaterialTheme.typography.titleLarge)
                 val typeLabel = when (note.type) {
                     is NoteType.Text -> "ТЕКСТ"
                     is NoteType.Image -> "КАРТИНКА"
                     is NoteType.Audio -> "АУДИО"
                 }
-                Text(
-                    text = typeLabel,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-
+                Text(typeLabel, style = MaterialTheme.typography.labelMedium)
                 val fmt = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
-                Text(
-                    text = fmt.format(Date(note.createdAt)),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.outline,
-                )
-
+                Text(fmt.format(Date(note.createdAt)), style = MaterialTheme.typography.labelMedium)
                 Spacer(Modifier.height(16.dp))
-
-                Text(
-                    text = note.content,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
+                Text(note.content, style = MaterialTheme.typography.bodyLarge)
             }
         }
     }
@@ -98,6 +67,4 @@ private fun demoNotes() = listOf(
     Note(1, "Первая", "Полный текст первой заметки", System.currentTimeMillis(), NoteType.Text),
     Note(2, "Вторая", "Описание картинки", System.currentTimeMillis(), NoteType.Image),
     Note(3, "Третья", "Запись лекции", System.currentTimeMillis(), NoteType.Audio),
-    Note(4, "Четвёртая", "Длинный текст", System.currentTimeMillis(), NoteType.Text),
-    Note(5, "Пятая", "Ещё текст", System.currentTimeMillis(), NoteType.Text),
 )

@@ -1,6 +1,12 @@
 package ru.notesapp.ui
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material3.Icon
@@ -22,17 +28,9 @@ fun EmptyState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Icon(
-            imageVector = Icons.Default.NoteAdd,
-            contentDescription = null,
-            modifier = Modifier.size(64.dp),
-        )
+        Icon(Icons.Default.NoteAdd, contentDescription = null, modifier = Modifier.size(64.dp))
         Spacer(Modifier.height(16.dp))
         Text(title, style = MaterialTheme.typography.titleMedium)
-        Text(
-            subtitle,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.outline,
-        )
+        Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.outline)
     }
 }
