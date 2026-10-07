@@ -67,10 +67,10 @@ class NotesViewModel @Inject constructor(
         }
     }
 
-    fun addNote(title: String, content: String, type: NoteType = NoteType.Text) {
+    fun addNote(title: String, content: String, type: NoteType = NoteType.Text, imageUrl: String? = null,) {
         if (title.isBlank()) return
         viewModelScope.launch {
-            when (val r = repository.add(Note(0, title, content, System.currentTimeMillis(), type))) {
+            when (val r = repository.add(Note(0, title, content, System.currentTimeMillis(), type, imageUrl = imageUrl,))) {
                 is NetworkResult.Success -> _snackbar.value = "Заметка создана"
                 is NetworkResult.Error -> _snackbar.value = "Ошибка: ${r.code}"
                 is NetworkResult.NetworkError -> _snackbar.value = "Нет соединения"

@@ -37,10 +37,11 @@ class SyncedNotesRepository @Inject constructor(
         val created = api.createPost(NoteDto(title = note.title, body = note.content))
         dao.insert(
             NoteEntity(
-                title = created.title,
-                content = created.body,
+                title = note.title,
+                content = note.content,
                 createdAt = System.currentTimeMillis(),
                 type = note.type,
+                imageUrl = note.imageUrl,
             )
         )
     }

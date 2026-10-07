@@ -12,4 +12,5 @@ data class Note(
     val content: String,
     val createdAt: Long,
     val type: NoteType,
+    val imageUrl: String? = null,
 )

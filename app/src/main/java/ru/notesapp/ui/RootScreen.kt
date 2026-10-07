@@ -22,7 +22,9 @@ import androidx.navigation.navArgument
 import ru.notesapp.ui.navigation.Routes
 import ru.notesapp.ui.theme.ThemeVariant
 import ru.notesapp.viewmodel.NotesViewModel
-
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ru.notesapp.viewmodel.NotesUiState
 private data class BottomItem(
     val route: String,
     val title: String,
@@ -75,6 +77,7 @@ fun RootScreen(
             composable(Routes.NOTES) {
                 NotesListScreen(
                     onNoteClick = { note -> navController.navigate(Routes.note(note.id)) },
+                    onOpenGallery = { navController.navigate(Routes.GALLERY) },
                 )
             }
             composable(
@@ -86,6 +89,35 @@ fun RootScreen(
             }
             composable(Routes.SETTINGS) {
                 SettingsScreen(onThemeChange = onThemeChange, currentTheme = currentTheme)
+            }
+
+            composable(Routes.GALLERY) {
+                val uiState by hiltViewModel<NotesViewModel>().uiState.collectAsStateWithLifecycle()
+                val notes = (uiState as? NotesUiState.Success)?.notes.orEmpty()
+                PhotoGalleryScreen(
+                    notes = notes,
+                    onImageClick = { note -> navController.navigate(Routes.fullscreen(note.id)) },
+                    onBack = { navController.popBackStack() },
+                )
+            }
+
+// Полноэкранный просмотр
+            composable(
+                route = Routes.FULLSCREEN,
+                arguments = listOf(navArgument("id") { type = NavType.LongType }),
+            ) { entry ->
+                val id = entry.arguments?.getLong("id") ?: -1L
+                val uiState by hiltViewModel<NotesViewModel>().uiState.collectAsStateWithLifecycle()
+                val note = (uiState as? NotesUiState.Success)?.notes?.find { it.id == id }
+                if (note?.imageUrl != null) {
+                    FullScreenImageScreen(
+                        imageUrl = note.imageUrl,
+                        title = note.title,
+                        onBack = { navController.popBackStack() },
+                    )
+                } else {
+                    EmptyState("Картинка не найдена", "Вернитесь назад")
+                }
             }
         }
     }

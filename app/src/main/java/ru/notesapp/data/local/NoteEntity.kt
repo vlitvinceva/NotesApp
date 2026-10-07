@@ -14,4 +14,5 @@ data class NoteEntity(
     @ColumnInfo(name = "created_at") val createdAt: Long,
     @ColumnInfo(name = "updated_at") val updatedAt: Long = 0L,
     @ColumnInfo(name = "type") val type: NoteType,
+    @ColumnInfo(name = "image_url") val imageUrl: String? = null,
 )

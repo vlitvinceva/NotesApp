@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
@@ -36,12 +37,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.notesapp.domain.Note
 import ru.notesapp.viewmodel.NotesUiState
 import ru.notesapp.viewmodel.NotesViewModel
+import ru.notesapp.domain.NoteType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotesListScreen(
     onNoteClick: (Note) -> Unit,
+    onOpenGallery: () -> Unit,
     viewModel: NotesViewModel = hiltViewModel(),
+
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
@@ -50,6 +54,8 @@ fun NotesListScreen(
     var showDialog by remember { mutableStateOf(false) }
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
+    var imageUrl by remember { mutableStateOf("") }
+
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -65,6 +71,9 @@ fun NotesListScreen(
             TopAppBar(
                 title = { Text("Заметки") },
                 actions = {
+                    IconButton(onClick = onOpenGallery) {
+                        Icon(Icons.Default.PhotoLibrary, contentDescription = "Галерея")
+                    }
                     if (isRefreshing) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
@@ -129,21 +138,30 @@ fun NotesListScreen(
                         onValueChange = { content = it },
                         label = { Text("Содержание") },
                     )
+                    OutlinedTextField(
+                        value = imageUrl,
+                        onValueChange = { imageUrl = it },
+                        label = { Text("URL изображения") },
+                    )
                 }
             },
             confirmButton = {
                 TextButton(
                     enabled = title.isNotBlank(),
                     onClick = {
-                        viewModel.addNote(title, content)
+                        val type = if (imageUrl.isNotBlank()) NoteType.Image else NoteType.Text
+                        viewModel.addNote(
+                            title = title,
+                            content = content,
+                            type = type,
+                            imageUrl = imageUrl.takeIf { it.isNotBlank() },
+                        )
                         title = ""
                         content = ""
+                        imageUrl = ""
                         showDialog = false
                     },
                 ) { Text("Сохранить") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDialog = false }) { Text("Отмена") }
             },
         )
     }

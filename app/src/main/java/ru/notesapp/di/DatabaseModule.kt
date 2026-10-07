@@ -9,6 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import ru.notesapp.data.local.AppDatabase
 import ru.notesapp.data.local.MIGRATION_1_2
+import ru.notesapp.data.local.MIGRATION_2_3
 import ru.notesapp.data.local.NoteDao
 import javax.inject.Singleton
 
@@ -24,7 +25,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             "notes.db",
         )
-            .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .build()
 
     @Provides
