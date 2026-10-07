@@ -87,6 +87,8 @@ dependencies {
     implementation(libs.glide)
     kapt(libs.glide.compiler)
     implementation(libs.glide.okhttp3.integration)
+    implementation(libs.androidx.preference.ktx)
+    implementation(libs.androidx.fragment.ktx)
     // Tests
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

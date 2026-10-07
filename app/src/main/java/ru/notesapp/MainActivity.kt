@@ -16,10 +16,6 @@ import ru.notesapp.ui.theme.ThemeVariant
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        android.util.Log.d("HiltCheck", "MainActivity created with @AndroidEntryPoint")
-
-
-
         setContent {
             var theme by remember { mutableStateOf(ThemeVariant.PASTEL) }
             NotesAppTheme(themeVariant = theme) {

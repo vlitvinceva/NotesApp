@@ -1,5 +1,6 @@
 package ru.notesapp.ui
 
+import android.view.View
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Note
@@ -25,6 +26,14 @@ import ru.notesapp.viewmodel.NotesViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.notesapp.viewmodel.NotesUiState
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.fragment.app.commit
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentContainerView
+
 private data class BottomItem(
     val route: String,
     val title: String,
@@ -73,7 +82,29 @@ fun RootScreen(
             navController = navController,
             startDestination = Routes.NOTES,
             modifier = Modifier.padding(inner),
-        ) {
+        ) {composable(Routes.SETTINGS_FRAGMENT) {
+            val context = LocalContext.current
+            val containerId = remember { View.generateViewId() }
+
+            AndroidView(
+                factory = { ctx ->
+                    FragmentContainerView(ctx).apply {
+                        id = containerId
+                    }
+                },
+                update = { view ->
+                    val activity = context as? FragmentActivity ?: return@AndroidView
+                    val existing = activity.supportFragmentManager.findFragmentById(containerId)
+                    if (existing == null) {
+                        activity.supportFragmentManager.commit {
+                            replace(containerId, SettingsFragment())
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+
             composable(Routes.NOTES) {
                 NotesListScreen(
                     onNoteClick = { note -> navController.navigate(Routes.note(note.id)) },
@@ -88,7 +119,16 @@ fun RootScreen(
                 NoteDetailScreen(noteId = id, onBack = { navController.popBackStack() })
             }
             composable(Routes.SETTINGS) {
-                SettingsScreen(onThemeChange = onThemeChange, currentTheme = currentTheme)
+                val context = LocalContext.current
+                SettingsScreen(
+                    onThemeChange = onThemeChange,
+                    currentTheme = currentTheme,
+                    onOpenLegacySettings = {
+                        context.startActivity(
+                            android.content.Intent(context, SettingsActivity::class.java)
+                        )
+                    },
+                )
             }
 
             composable(Routes.GALLERY) {

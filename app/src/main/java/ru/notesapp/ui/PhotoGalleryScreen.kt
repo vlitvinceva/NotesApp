@@ -30,8 +30,8 @@ import ru.notesapp.domain.NoteType
 @Composable
 fun PhotoGalleryScreen(
     notes: List<Note>,
-    onImageClick: (Note) -> Unit,       // ← добавить параметр
-    onBack: () -> Unit,                 // ← добавить параметр
+    onImageClick: (Note) -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val photos = notes.filter { it.type is NoteType.Image && !it.imageUrl.isNullOrBlank() }
